@@ -1,8 +1,8 @@
-# Create React App starter
+# react-cakes
 
-Create react app plus material ui components, redux toolkit, axios and react router
+A simple react app to add, delete and list cakes using an [API](https://github.com/chrismhodgson/node-cakes)
 
-# Install and run it
+## Install and run it
 
 ```sh
 npm i && npm start
