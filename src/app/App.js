@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import store from'./store'
 
-import { Typography, Container, Grid } from '@mui/material';
+import { Typography, Container } from '@mui/material';
 import CakeItem from '../features/cakes/CakeItem';
 import CakeList from '../features/cakes/CakeList';
 import CakeAdd from '../features/cakes/CakeAdd';

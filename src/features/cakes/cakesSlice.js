@@ -8,11 +8,11 @@ const initialState = [
   { id: 4, name: 'panda cake', comments: 'The best cake', yumFactor: 5, imageUrl: 'https://i.pinimg.com/736x/8f/9e/47/8f9e475511e703929d39853908fcde47.jpg' },
 ]
 
-export const fetchCakes = createAsyncThunk('repositories/fetchCakes', async () => {
-  const response = await get()
-  let items = response.data && response.data.items || []
-  return { ...items }
-})
+// export const fetchCakes = createAsyncThunk('repositories/fetchCakes', async () => {
+//   const response = await get()
+//   let items = response.data && response.data.items || []
+//   return { ...items }
+// })
 
 export const cakesSlice = createSlice({
   name: 'cakes',
@@ -20,16 +20,15 @@ export const cakesSlice = createSlice({
   reducers: {
     deleteCake: (state, action) => {
       const id = parseInt(action.payload)
-      state = state.filter(item => item.id !== id)
+      return state.filter(item => item.id !== id)
     },
     addCake: (state, action) => {
       const cake = {...action.payload, id: Math.floor(Math.random() * 100) + 10}
       state.push(cake)
-      // console.log(cake, 'addCake')
     }
   },
   extraReducers: builder => {
-    builder.addCase(fetchCakes.fulfilled, (state, action) => state = action.payload)
+    // builder.addCase(fetchCakes.fulfilled, (state, action) => state = action.payload)
   }
 })
 

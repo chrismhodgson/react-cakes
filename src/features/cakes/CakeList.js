@@ -6,9 +6,8 @@ import { selectCakes } from './cakesSlice'
 
 export default function CakeList() {
   const cakes = useSelector(selectCakes)
-  const items = cakes.items
 
-  if (items.length === 0) return (
+  if (cakes.length === 0) return (
     <Box>No cakes found. <Link to={`/add`}>Add a cake</Link></Box>
   )
 
@@ -17,7 +16,7 @@ export default function CakeList() {
       <Link to={`/add`}>New Cake</Link>
 
       <ImageList variant="masonry" cols={3} gap={8}>
-        {items.map(item => (
+        {cakes.map(item => (
           <Link key={item.id} to={`/${item.id}`}>
             <ImageListItem><img
               src={`${item.imageUrl}?w=248&fit=crop&auto=format`}

@@ -16,9 +16,6 @@ export default function CakeItem(props) {
   if (!cake) {
     return <Box>Cake not found. <Link to="/">Please return to list of cakes!</Link></Box>
   }
-  if (cake.deleted) {
-    return <Box>Cake deleted. <Link to="/">Please return to list of cakes!</Link></Box>
-  }
 
   return (
     <Card >
