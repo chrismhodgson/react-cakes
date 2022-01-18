@@ -1,24 +1,50 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux'
-import { Button, Typography } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux'
+import { Button, Typography, Box } from '@mui/material';
+import { Link } from "react-router-dom";
 import { ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import { addCake } from './cakesSlice';
-import { Redirect } from 'react-router';
+import Loading from '../../components/Loading';
 
-export default function CakeAdd(props) {
-  const dispatch = useDispatch()
+export default function CakeAdd() {
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [comments, setComments] = useState('');
   const [yumFactor, setYumFactor] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+  const cakes = useSelector(state => state.cakes)
+
+  const dispatch = useDispatch()
   const handleSubmit = () => {
     dispatch(addCake({ name, comments, imageUrl, yumFactor }))
-    props.history.push("/")
+    setSubmitted(true)
+  }
+  const clearForm = () => {
+    setSubmitted(false)
+    setName('')
+    setImageUrl('')
+    setComments('')
+    setYumFactor(0)
+  }
+
+  if (submitted && cakes.status === 'loading') {
+    return <Loading />
+  }
+  if (submitted && cakes.status === 'failed') {
+    return <Error error={`Oops, there was a problem adding the cake - "${cakes.error}"`} />
+  }
+
+  if (submitted && cakes.status === 'succeeded') {
+    return (
+      <Box sx={{ mb: 2 }}>
+        Cake added successfully. <Link onClick={clearForm} to="#">Add another</Link> or <Link to="/">return to list of cakes</Link>
+      </Box>
+    )
   }
 
   return (
     <>
-      <Typography gutterBottom variant="body2">Add new cake</Typography>
+      <Typography gutterBottom variant="h5">Add new cake</Typography>
 
       <ValidatorForm
           onSubmit={handleSubmit}
@@ -35,7 +61,7 @@ export default function CakeAdd(props) {
         />
         <TextValidator
             label="Image URL"
-            onChange={e => { console.log(e.target.value, 'setImageUrl'); setImageUrl(e.target.value) }}
+            onChange={e => { setImageUrl(e.target.value) }}
             name="imageUrl"
             value={imageUrl}
             validators={['required', 'matchRegexp: *.(png|jpg|jpeg|svg|gif)$']}

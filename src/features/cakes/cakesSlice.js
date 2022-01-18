@@ -1,43 +1,78 @@
+import { get, post, del } from "../../app/api-client";
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import get from "../../app/api-client";
 
-const initialState = [
-  { id: 1, name: 'haloween cake', comments: 'A nice cake', yumFactor: 2, imageUrl: 'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/delish-halloween-cake-horizontal-1539895591.jpg' },
-  { id: 2, name: 'galaxy cake', comments: 'A very nice cake', yumFactor: 3, imageUrl: 'https://cdn.shopify.com/s/files/1/2725/9456/products/flavourtown-bakery-london-cakes_galaxy-cake_2048x2048.jpg' },
-  { id: 3, name: 'kids cake', comments: 'A very very nice cake', yumFactor: 4, imageUrl: 'https://cakewhiz.com/wp-content/uploads/2020/02/Kids-Chocolate-Birthday-Cake-Recipe.jpg' },
-  { id: 4, name: 'panda cake', comments: 'The best cake', yumFactor: 5, imageUrl: 'https://i.pinimg.com/736x/8f/9e/47/8f9e475511e703929d39853908fcde47.jpg' },
-]
+const initialState = { status: 'idle', items: [], pages: 0, error: null }
 
-// export const fetchCakes = createAsyncThunk('repositories/fetchCakes', async () => {
-//   const response = await get()
-//   let items = response.data && response.data.items || []
-//   return { ...items }
-// })
+export const fetchCakes = createAsyncThunk('repositories/fetchCakes', async (page = 0) => {
+  const response = await get(`?page=${page}&limit=5`)
+  console.log(response.data.meta, 'fetchCakes meta')
+  return response.data
+})
+export const deleteCake = createAsyncThunk('repositories/deleteCake', async (id) => {
+  const response = await del(id)
+  return response.data
+})
+export const addCake = createAsyncThunk('repositories/addCake', async (cake) => {
+  const response = await post(cake)
+  return response.data
+})
 
 export const cakesSlice = createSlice({
   name: 'cakes',
   initialState,
   reducers: {
-    deleteCake: (state, action) => {
-      const id = parseInt(action.payload)
-      return state.filter(item => item.id !== id)
-    },
-    addCake: (state, action) => {
-      const cake = {...action.payload, id: Math.floor(Math.random() * 100) + 10}
-      state.push(cake)
-    }
+    // example: (state, action) => {}
   },
   extraReducers: builder => {
-    // builder.addCase(fetchCakes.fulfilled, (state, action) => state = action.payload)
+    builder
+      // fetchCakes
+      .addCase(fetchCakes.pending, (state, action) => {
+        state.status = 'loading'
+      })
+      .addCase(fetchCakes.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        if (action.payload.items.length !== 0) {
+          state.pages = action.payload.meta.totalPages
+          //state.items.push(...action.payload.items)
+          state.items = action.payload.items
+        }
+      })
+      .addCase(fetchCakes.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.error.message
+      })
+
+      // deleteCake
+      .addCase(deleteCake.pending, (state, action) => {
+        state.status = 'loading'
+      })
+      .addCase(deleteCake.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.items = state.items.filter(item => item._id !== action.payload)
+      })
+      .addCase(deleteCake.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.error.message
+      })
+
+      // addCake
+      .addCase(addCake.pending, (state, action) => {
+        state.status = 'loading'
+      })
+      .addCase(addCake.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.items.push(action.payload)
+      })
+      .addCase(addCake.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.error.message
+      })
   }
 })
 
-export const selectCakes = state => state.cakes
 export const selectCakeById = id => state => {
-  id = parseInt(id)
-  return state.cakes.find(cake => cake.id === id)
+  return state?.cakes?.items.find(cake => cake._id === id)
 }
-
-export const { addCake, deleteCake } = cakesSlice.actions
+// export const { example } = cakesSlice.actions
 
 export default cakesSlice.reducer

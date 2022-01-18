@@ -1,24 +1,35 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Button, Card, CardMedia, CardContent, CardActions, Typography } from '@mui/material';
 import { selectCakeById, deleteCake } from './cakesSlice';
+import Error from '../../components/Error';
+import Loading from '../../components/Loading';
 
 export default function CakeItem(props) {
   const id = props.match.params.id
-  const cake = useSelector(selectCakeById(id))
+  const [deleted, setDeleted] = useState(false);
   const dispatch = useDispatch()
   const del = () => {
     dispatch(deleteCake(id))
-    props.history.push("/")
+    setDeleted(true)
   }
+  const cake = useSelector(selectCakeById(id))
+  const cakes = useSelector(state => state.cakes)
 
+  if (cakes.status === 'loading') return <Loading />
+
+  if (cakes.status === 'failed') {
+    return <Error error={`Oops, there was a problem deleting the cake - "${cakes.error}"`} />
+  }
   if (!cake) {
-    return <Box>Cake not found. <Link to="/">Please return to list of cakes!</Link></Box>
+    return <Box>Cake {deleted ? 'deleted' : 'not found'}. <Link to="/">Please return to list of cakes!</Link></Box>
   }
 
   return (
     <Card >
+      <Typography gutterBottom variant="h5">Cake Details</Typography>
+
       <CardMedia
         component="img"
         image={cake.imageUrl}
